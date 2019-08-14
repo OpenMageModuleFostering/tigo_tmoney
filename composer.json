@@ -1,9 +1,9 @@
 {
     "name": "OpenMageModuleFostering/Tigo_Tmoney",
     "type": "magento-module",
-    "license": "GPL",
+    "license": "GLP",
     "homepage": "",
-    "description": "test",
+    "description": "Fix version",
     "authors": [
     {
         "name": "Marcelo Guevara",
