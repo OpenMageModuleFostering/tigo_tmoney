@@ -29,7 +29,7 @@
 </div>
 <script type="text/javascript">
     var $j = jQuery.noConflict();
-    var contV = 5;
+    var contV = <?php echo $this->getTimer(); ?>;
     $j(document).ready(function(){
         var timer = setInterval(function () {
             if(contV > 0) {

@@ -69,14 +69,14 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
     /*Verify by cron job*/
     public function setParamKeyTigoCron($storeID){
         try {
-            $this->urlTransaction = Mage::getStoreConfig('tigo_tmoney/tmoney/submit_url', $storeID);//url to have a gateway to connect to LOGIC CORE
-            $this->pubKey = Mage::getStoreConfig('tigo_tmoney/tmoney/key_id', $storeID);//user to validate the connection
-            $this->priKey = Mage::getStoreConfig('tigo_tmoney/tmoney/key_encrypt', $storeID);//password to connect the connection
+            $this->urlTransaction = Mage::getStoreConfig('payment/tmoney/submit_url', $storeID);//url to have a gateway to connect to LOGIC CORE
+            $this->pubKey = Mage::getStoreConfig('payment/tmoney/key_id', $storeID);//user to validate the connection
+            $this->priKey = Mage::getStoreConfig('payment/tmoney/key_encrypt', $storeID);//password to connect the connection
 
-            $this->proxyusername = Mage::getStoreConfig('tigo_tmoney/tmoney/proxyusername', $storeID);
-            $this->proxypassword = Mage::getStoreConfig('tigo_tmoney/tmoney/proxypassword', $storeID);
-            $this->proxyhost = Mage::getStoreConfig('tigo_tmoney/tmoney/proxyhost', $storeID);
-            $this->proxyport = Mage::getStoreConfig('tigo_tmoney/tmoney/proxyport', $storeID);
+            $this->proxyusername = Mage::getStoreConfig('payment/tmoney/proxyusername', $storeID);
+            $this->proxypassword = Mage::getStoreConfig('payment/tmoney/proxypassword', $storeID);
+            $this->proxyhost = Mage::getStoreConfig('payment/tmoney/proxyhost', $storeID);
+            $this->proxyport = Mage::getStoreConfig('payment/tmoney/proxyport', $storeID);
         } catch (Exception $ex) {
             Mage::Log('Error setParamKeyTigoCron: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
         }
@@ -473,9 +473,9 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
     public function verifyCron($id, $storeID){
         $result = '';
         try{
-            Mage::Log('the status of Cronjob: '.$id.'  -  '. $storeID, null, 'tigobusiness-tigomoney.log');
+            //Mage::Log('the status of Cronjob: '.$id.'  -  '. $storeID, null, 'prepago-tigomoney.log');
             $this->setParamKeyTigoCron($storeID);
-            Mage::Log('the status -- of Cronjob: '.Mage::getStoreConfig('tigo_tmoney/tmoney/submit_url', $storeID), null, 'tigobusiness-tigomoney.log');
+            //Mage::Log('the status -- of Cronjob: '.Mage::getStoreConfig('prepago_tmoney/tmoney/submit_url', $storeID), null, 'prepago-tigomoney.log');
             $pubk = $this->pubKey;// Identify key
             $prik = $this->priKey;//Encrypt Key
             
@@ -487,7 +487,7 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
             $connect['proxyport'] = $this->proxyport;
             $connect['urlTransaction'] = $this->urlTransaction;
             
-            //Mage::Log('Error data Verify: '.$pubk.' ---- '.$prik, null, 'tigobusiness-tigomoney.log');
+            //Mage::Log('Error data Verify: '.$pubk.' ---- '.$prik, null, 'prepago-tigomoney.log');
             
             $response = '';
             $cleanr = '';
@@ -500,11 +500,11 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
                 'key' => trim($pubk),
                 'parametros' => trim($cleanr)
             );
-            //Mage::Log('Error Param Verify: '.print_r($param, true), null, 'tigobusiness-tigomoney.log');
+            //Mage::Log('Error Param Verify: '.print_r($param, true), null, 'prepago-tigomoney.log');
             $result = $this->wsAction('consultarEstado', $param, $connect);
-            //Mage::Log('Error result Verify: '.print_r($result, true), null, 'tigobusiness-tigomoney.log');
+            //Mage::Log('Error result Verify Cron: '.print_r($result, true), null, 'prepago-tigomoney.log');
         } catch (Exception $ex){
-            Mage::Log('Error Verify: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+            Mage::Log('Error Verify: '.$ex->getMessage(), null, 'prepago-tigomoney.log');
         }
         return $result;
     }
@@ -589,5 +589,12 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
             Mage::Log('Error get ErrorMessage: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
         }
         return $result;
+    }
+    
+    /**
+     * Get the Timer in the Status page
+     */
+    public function getTimer(){
+        return $this->getConfigData('timer');
     }
 }

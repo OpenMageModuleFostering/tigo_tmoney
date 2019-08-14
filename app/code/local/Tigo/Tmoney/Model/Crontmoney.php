@@ -39,7 +39,7 @@ class Tigo_Tmoney_Model_Crontmoney {
                         ->addAttributeToFilter('status', array('eq' => 'pending'))
                         ->addAttributeToSort('increment_id', 'desc')->load();
 
-                Mage::Log(' - time: '. intval($timeout_our).' - min: '.$timeout_min , null, 'tigobusiness-tigomoney-cron.log');
+                //Mage::Log(' - time: '. intval($timeout_our).' - min: '.$timeout_min , null, 'tigobusiness-tigomoney-cron.log');
 
                 foreach($orders as $order){
                     $infoPayment = $order->getPayment();
@@ -59,10 +59,10 @@ class Tigo_Tmoney_Model_Crontmoney {
                     $time_order = mktime(intval($time_[0]) + intval($timeout_our), intval($time_[1]) + intval($timeout_min), $time_[2], $date_[1], $date_[0], $date_[2]);
                     
                     if(trim($paymentMethod) == $module_code){
-                        Mage::Log('Data error: '.$order->getIncrementId().'   -   '.$order->getStoreId() , null, 'tigobusiness-tigomoney-cron.log');
+                        //Mage::Log('Data error: '.$order->getIncrementId().'   -   '.$order->getStoreId() , null, 'tigobusiness-tigomoney-cron.log');
                         
-                        $data_money = $tigomoneyb_->verify($order->getIncrementId(), $order->getStoreId());
-                        Mage::Log('Data ---- result ---- error: '.print_r($data_money, true) , null, 'tigobusiness-tigomoney-cron.log');
+                        $data_money = $tigomoneyb_->verifyCron($order->getIncrementId(), $order->getStoreId());
+                        //Mage::Log('Data ---- result ---- error: '.print_r($data_money, true) , null, 'tigobusiness-tigomoney-cron.log');
                         if(trim($data_money[0]) != 0 and trim($data_money[0]) != ''){
                             if((intval($date_[0]) == intval($current_date[0])) and (intval($date_[1]) == intval($current_date[1])) and (intval($date_[2]) == intval($current_date[2]))){
                                 if($time_current >= $time_order){

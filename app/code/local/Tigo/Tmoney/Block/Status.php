@@ -45,4 +45,16 @@ class Tigo_Tmoney_Block_Status extends Mage_Core_Block_Template{
     protected function _getCheckout() {
         return Mage::getSingleton('checkout/session');
     }
+    /*
+     * Timer
+     */
+    function getTimer(){
+        $tigomoney = Mage::getModel('tmoney/paymethod');
+        $timer = trim($tigomoney->getTimer());
+        $result = $timer;
+        if($timer == ''){
+            $result = 60;
+        }
+        return $result;
+    }
 }
