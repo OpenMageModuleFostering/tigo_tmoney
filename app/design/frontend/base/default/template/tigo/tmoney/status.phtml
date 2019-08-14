@@ -1,0 +1,65 @@
+<?php
+    $data = $this->getDataP();
+    $orderID = (isset($data['orderId']))? $data['orderId'] : $this->getIDOrder();
+    $verify = $this->verifyS($orderID);
+    $image = $this->getSkinUrl('tmoney/img/bg-img-mymodal.png');
+?>
+<div class="error-page-tigomoney statuspage">
+    <div class="image"><img src="<?php echo $image ?>" alt="Error" /></div>
+    <div class="content-data">
+        <div class="page-title category-title">
+            <h2><?php echo $this->__('Confirmar compra') ?></h2>
+        </div>
+        <section class="message">
+            <?php 
+                $message_block = $this->getLayout()->createBlock('cms/block')->setBlockId('status_tigomoney')->toHtml();
+                if($message_block){
+                   echo $message_block;
+                }else{
+            ?>
+                <p><?php echo $this->__('Espera por favor, estamos procesando tu solicitud.'); ?></p>
+                <br />
+                <p><?php echo $this->__('Para continuar haz click aquí cuando se habilite el botón.'); ?></p>
+            <?php } ?>
+            <div class="content-buttons">
+                <a class="button no-active" ><?php echo $this->__('Continuar'); ?></a>
+            </div>
+        </section>
+    </div>
+</div>
+<script type="text/javascript">
+    var $j = jQuery.noConflict();
+    var contV = 5;
+    $j(document).ready(function(){
+        var timer = setInterval(function () {
+            if(contV > 0) {
+                console.log('ex:' + contV);
+                $j.ajax({
+                    method: "GET",
+                    async: false,
+                    url: "<?php echo Mage::getUrl('tigomoney/index/verify'); ?>",
+                    data: { orderId: "<?php echo $orderID ?>" }
+                }).done(function( msg ) {
+                    var data = $j.parseJSON(msg);
+                    console.log(data[0] + "-" + data[1] + " - "+data[2]);
+                    if(data[0] == '0'){
+                        contV = 0;
+                        $j('a.button').removeClass('no-active');
+                        $j('a.button').attr('href', data[1]+'&msg=<?php echo $data['message'] ?>&'+data[2]);
+                        window.location.href = data[1]+'&msg=<?php echo $data['message']?>';
+                    }else{
+                        if(contV == '1' && data[0] == '1'){
+                            $j('a.button').removeClass('no-active');
+                            $j('a.button').attr('href', data[1]+'&msg=<?php echo $data['message'] ?>&'+data[2]);
+                        }
+                    }
+                });
+            }
+            contV--;
+            if (contV === -1) {
+                clearInterval(timer);
+            }
+        }, 2000);
+    });
+    
+</script>

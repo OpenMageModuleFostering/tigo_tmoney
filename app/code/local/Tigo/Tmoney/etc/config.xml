@@ -2,7 +2,7 @@
 <config>
     <modules>
        <Tigo_Tmoney>
-          <version>1.0.0</version>
+          <version>1.1.0</version>
        </Tigo_Tmoney>
     </modules>
  	
@@ -45,10 +45,20 @@
         <models>
             <tmoney>
                 <class>Tigo_Tmoney_Model</class>
+                <resoursemodel>membership_mysql4</resoursemodel>
             </tmoney>
+            <tmoney_mysql4>
+                <class>Inchoo_DBScript_Model_Mysql4</class>
+                <entities>
+                    <tigomoney>
+                        <table>tigo_tmoney_tigomoney</table>
+                    </tigomoney>
+                </entities>
+            </tmoney_mysql4>
         </models>
  
         <resources>
+            
             <tmoney_setup>
                 <setup>
                     <module>Tigo_Tmoney</module>
@@ -78,7 +88,7 @@
                 <order_status>pending</order_status>
                 <title>Tigo Business - Tigo Money</title>
                 <payment_action>authorize</payment_action>
-                <submit_url>http://190.129.208.178:96/vipagos/faces/payment.xhtml</submit_url>
+                <submit_url>http://190.129.208.178:96/PasarelaServices/CustomerServices?wsdl</submit_url>
                 <key_id>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</key_id>
                 <key_encrypt>xxxxxxxxxxxx</key_encrypt>
                 <message>Para realizar las transacciones a traves de TIGO Money se enviara un mensaje a su celular pidiendo que coloque su PIN para realizar la transaccion.</message>
@@ -86,4 +96,17 @@
             </tmoney>
          </payment>
     </default>
+    
+    <crontab>
+        <jobs>
+            <tmoney_mycronaction>
+                <run>
+                    <model>tmoney/crontmoney::changeStatusTigoMoneyCronJob</model>
+                </run>
+                <schedule>
+                    <cron_expr>0 * * * *</cron_expr>
+                </schedule>
+            </tmoney_mycronaction>
+        </jobs>
+    </crontab>
 </config>

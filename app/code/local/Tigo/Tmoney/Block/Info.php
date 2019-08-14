@@ -1,5 +1,5 @@
 <?php 
-class Tigo_Tmoney_Block_Info extends Mage_Payment_Block_Info_Cc{
+class Tigo_Tmoney_Block_Info extends Mage_Payment_Block_Info{
 
     protected function _prepareSpecificInformation($transport = null){
         if (null !== $this->_paymentSpecificInformation) {
@@ -8,9 +8,7 @@ class Tigo_Tmoney_Block_Info extends Mage_Payment_Block_Info_Cc{
         $info = $this->getInfo();
         $transport = new Varien_Object();
         $transport = parent::_prepareSpecificInformation($transport);
-        $transport->addData(array(
-            'test'=>'test'
-        ));
+        
         return $transport;
     }
 	/*protected function _prepareSpecificInformation($transport = null)

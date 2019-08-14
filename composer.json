@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "GLP",
     "homepage": "",
-    "description": "Fix version",
+    "description": "Update the payment method to a webservice",
     "authors": [
     {
         "name": "Marcelo Guevara",

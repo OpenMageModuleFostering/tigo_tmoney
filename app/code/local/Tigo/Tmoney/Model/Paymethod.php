@@ -4,8 +4,9 @@
  * Author: Marcelo Guevara
  * Email: marcelo.guevara@connaxis.com
  * Skype: connaxis.mguevara
- * Version: 1
+ * Version: 1.1.0
 */
+require_once(Mage::getBaseDir('lib') . '/nusoap/nusoap.php');
 
 class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
 
@@ -44,6 +45,42 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
     var $mage_currency = '';
     var $lang_mage = '';
     
+    var $proxyusername;
+    var $proxypassword;
+    var $proxyhost;
+    var $proxyport;
+    
+    /*Verify in he Site*/
+    public function setParamKeyTigo(){
+        try {
+            $this->urlTransaction = $this->getConfigData('submit_url');//url to have a gateway to connect to LOGIC CORE
+            $this->pubKey = $this->getConfigData('key_id');//user to validate the connection
+            $this->priKey = $this->getConfigData('key_encrypt');//password to connect the connection
+
+            $this->proxyusername = $this->getConfigData('proxyusername');
+            $this->proxypassword = $this->getConfigData('proxypassword');
+            $this->proxyhost = $this->getConfigData('proxyhost');
+            $this->proxyport = $this->getConfigData('proxyport');
+        } catch (Exception $ex) {
+            Mage::Log('Error setParamKeyTigo: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+    }
+    
+    /*Verify by cron job*/
+    public function setParamKeyTigoCron($storeID){
+        try {
+            $this->urlTransaction = Mage::getStoreConfig('tigo_tmoney/tmoney/submit_url', $storeID);//url to have a gateway to connect to LOGIC CORE
+            $this->pubKey = Mage::getStoreConfig('tigo_tmoney/tmoney/key_id', $storeID);//user to validate the connection
+            $this->priKey = Mage::getStoreConfig('tigo_tmoney/tmoney/key_encrypt', $storeID);//password to connect the connection
+
+            $this->proxyusername = Mage::getStoreConfig('tigo_tmoney/tmoney/proxyusername', $storeID);
+            $this->proxypassword = Mage::getStoreConfig('tigo_tmoney/tmoney/proxypassword', $storeID);
+            $this->proxyhost = Mage::getStoreConfig('tigo_tmoney/tmoney/proxyhost', $storeID);
+            $this->proxyport = Mage::getStoreConfig('tigo_tmoney/tmoney/proxyport', $storeID);
+        } catch (Exception $ex) {
+            Mage::Log('Error setParamKeyTigoCron: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+    }
     
     /*
      * Peryment function who create the connection of LOGIC Core and create a message of response.
@@ -69,6 +106,12 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
         $this->urlTransaction = $this->getConfigData('submit_url');//url to have a gateway to connect to LOGIC CORE
         $this->pubKey = $this->getConfigData('key_id');//user to validate the connection
         $this->priKey = $this->getConfigData('key_encrypt');//password to connect the connection
+        
+        $this->proxyusername = $this->getConfigData('proxyusername');
+        $this->proxypassword = $this->getConfigData('proxypassword');
+        $this->proxyhost = $this->getConfigData('proxyhost');
+        $this->proxyport = $this->getConfigData('proxyport');
+        
         $this->returnURL = Mage::getUrl('tigomoney/index/success', array('_secure' => true, '_query'=> array('orderID' => $this->orderId)));
         $this->backButtonURL = Mage::getUrl('tigomoney/index/back', array('_secure' => true, '_query'=> array('orderID' => $this->orderId)));
         $this->countryName = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getCountryId();
@@ -84,26 +127,30 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
             
             $this->company = isset($variable_blling['company'])? $variable_blling['company'] : '';
             $this->vat = isset($variable_blling['vat_id'])? $variable_blling['vat_id'] : '';
-            
+            Mage::getSingleton('customer/session')->setRedirectUrl(Mage::getUrl('tigomoney/index/status'));
             //$billingaddress = $order->getBillingAddress();
-            $urlTransaction = $this->tigomoney($amount);
-            if($urlTransaction != ''){
-                $response = 1;
+            $transaction = $this->tigomoney($amount);
+            
+            $query_ = '';
+            $i = 0;
+            foreach ($transaction as $label => $val){
+                if($i != 0){
+                    $query_ .= '&';
+                }
+                $query_ .=  $label.'='.$val;
+                $i++;
             }
+
+            $this->_redirectUrl = Mage::getUrl('tigomoney/index/status', array('_query'=>$query_));
+            Mage::getSingleton('customer/session')->setRedirectUrl(Mage::getUrl('tigomoney/index/status', array('_query'=>$query_)));
             
         } catch (Exception $e) {  
-            $payment->setStatus(self::STATUS_ERROR);  
-            $payment->setAmount($amount);  
-            $payment->setLastTransId($this->orderId);  
-            $this->setStore($payment->getOrder()->getStoreId());  
-            Mage::throwException($e->getMessage());  
-            $response = 0;
+            Mage::Log('Item data: '.$e->getMessage(), null, 'tigobusiness-tigomoney.log');
+            
         }  
-        if($response){
-            Mage::getSingleton('customer/session')->setRedirectUrl($urlTransaction);
-        }else{
-            Mage::getSingleton('customer/session')->setRedirectUrl(Mage::getUrl('tigomoney/index/error', array('_secure' => true, '_query'=> array('msg'=>'error', 'mesage'=>'error to create the url and redirect it'))));
-        }
+        //if($response){
+            //Mage::getSingleton('customer/session')->setRedirectUrl(Mage::getUrl('tigomoney/index/status', array()));
+        //}
         return $this;  
     } 
     /*
@@ -123,7 +170,7 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
     
     public function getOrderPlaceRedirectUrl(){
         Mage::Log('returning redirect url:: ' . $this->_redirectUrl , null, 'tigobusiness-tigomoney.log'); 
-        return Mage::getSingleton('customer/session')->getRedirectUrl();
+        return Mage::getSingleton('customer/session')->getRedirectUrl($this->_redirectUrl);
     }
     public function createFormBlock($name){
         $block = $this->getLayout()->createBlock('tigo/tmoney/form', $name)
@@ -166,9 +213,9 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
             $c_nit = $nit_user_number;
             $order_id = $this->orderId;
             $c_razon = $nit_user_name;
-            $url_transaction = (isset($this->urlTransaction))? $this->urlTransaction : 'http://190.129.208.178:96/vipagos/faces/payment.xhtml';
-            $pubk = (isset($this->pubKey))? $this->pubKey : '3124b901ec27b88b0694263bc32bcf9e6d266f4b3f0fa891bb28b0970eb035ab7abbb456ef0d582142177ddd4c44e15b0948a37347588423ca97ea7f431194cd';// Identify key
-            $prik = (isset($this->priKey))? $this->priKey :'HT4BW8DEP6GUPO2U9A6YHMM0';//Encrypt Key
+            $url_transaction = $this->urlTransaction;
+            $pubk = $this->pubKey;// Identify key
+            $prik = $this->priKey;//Encrypt Key
 
             $cart = Mage::getModel('checkout/cart')->getQuote();
             foreach ($cart->getAllItems() as $item) {
@@ -182,7 +229,7 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
                 array_push($items, $item_);
                 
                 $i++;
-                Mage::Log('Item data: '.$item_, null, 'tigobusiness-tigomoney.log');
+                //Mage::Log('Item data: '.$item_, null, 'tigobusiness-tigomoney.log');
             }
             $ndoc = $c_nit;
             $billetera = $msisdn;
@@ -212,14 +259,169 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
 
             Mage::Log('Encrypt Data of Tigomoney: '.$prmts, null, 'tigobusiness-tigomoney.log');
             $crypt = base64_encode(mcrypt_ecb( MCRYPT_3DES , $prik , $prmts, MCRYPT_ENCRYPT)); 
-            $reurl = $url_transaction.'?key='.$pubk.'&parametros='.$crypt;//redirect the URL of transaction
-            Mage::Log('URL of Tigomoney item crypt: '.$prmts, null, 'tigobusiness-tigomoney.log');
-            Mage::Log('URL of Tigomoney: '.$reurl, null, 'tigobusiness-tigomoney.log');
+            //$reurl = $url_transaction.'?key='.$pubk.'&parametros='.$crypt;//redirect the URL of transaction
+            //Mage::Log('URL of Tigomoney item crypt: '.$prmts, null, 'tigobusiness-tigomoney.log');
+            //Mage::Log('URL of Tigomoney: '.$reurl, null, 'tigobusiness-tigomoney.log');
+            $param = array(
+                'key' => $pubk,
+                'parametros' => $crypt
+            );
+            Mage::Log('URL of Tigomoney: '.print_r($param, true), null, 'tigobusiness-tigomoney.log');
+            
+            $connect = array();
+            
+            $connect['proxyusername'] = $this->proxyusername;
+            $connect['proxypassword'] = $this->proxypassword;
+            $connect['proxyhost'] = $this->proxyhost;
+            $connect['proxyport'] = $this->proxyport;
+            $connect['urlTransaction'] = $this->urlTransaction;
+            
+            $reurl = $this->wsAction('solicitarPago', $param, $connect);
+            $data_ = array(
+                array(
+                    'tmoney_order_id' => $this->orderId,
+                    'tomoney_ws_id' => ((is_array($reurl))? $reurl['orderId'] : $reurl),
+                ),
+            );
+            //Mage::getModel('tmoney/tigomoney')->setData($data_)->save();
+            
         } catch (Exception $ex){
             Mage::Log('Error to create the URL of Tigomoney: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
         }
         
         return $reurl;
+    }
+    
+    /*
+     * WSDL action
+     */
+    public function wsAction($action, $param, $connect = array()){
+        $result = '';
+        try{
+            $proxyusername = $connect['proxyusername'];
+            $proxypassword = $connect['proxypassword'];
+            $proxyhost = $connect['proxyhost'];
+            $proxyport = $connect['proxyport'];
+            
+            $webservice = $connect['urlTransaction'];
+            
+            //Mage::Log('Webservice Proxy user: '.$proxyusername.'- pass: '.$proxypassword.' - host:'.$proxyhost.' - port:'.$proxyport.' - url: '.$webservice, null, 'tigobusiness-tigomoney.log');
+            
+            $client = new nusoap_client($webservice,'wsdl', $proxyhost, $proxyport, $proxyusername, $proxypassword);
+            $err = $client->getError();
+            if ($err) {
+                Mage::Log('Error of webservice: '.$err, null, 'tigobusiness-tigomoney.log');
+            }
+            $result_ = $client->call(trim($action), $param);
+            //Mage::Log('Webservice '.$action.' Info: '.print_r($result_, true).' --- Param: '.print_r($param, true), null, 'tigobusiness-tigomoney.log');
+            if($result_){
+                if(isset($result_['return'])){
+                    if($action == 'solicitarPago'){
+                        $result = $this->decrypMessage($result_['return']);
+                    }else{
+                        $result = $this->decrypMessageVerify($result_['return']);
+                    }
+                }
+            }
+            Mage::Log('Webservice '.$action.' Info: '.print_r($result, true), null, 'tigobusiness-tigomoney.log');
+            
+        } catch (Exception $ex) {
+            Mage::Log('Webservice error: '.$ex->getMessage(). ' - action: '.$action, null, 'tigobusiness-tigomoney.log');
+        }
+        return $result;
+    }
+    /*
+     * Decript Message
+     */
+    public function decrypMessage($message){
+        $result = array();
+        try{
+            $prik = $this->priKey;
+            $response = '';
+            $cleanr = '';
+            if (isset($message)) {
+                $response = base64_decode(str_replace(' ','+',$message));
+                $cleanr = mcrypt_ecb( MCRYPT_3DES , $prik , $response, MCRYPT_DECRYPT);
+                if($cleanr){
+                    $result_ = explode('&', $cleanr);
+                    for($i = 0; $i < count($result_); $i++){
+                        $data_ = explode('=',$result_[$i]);
+                        if(count($data_) > 1){
+                            $result[$data_[0]] = $data_[1];
+                        }else{
+                            $result['data'] = (isset($result_[$i]))? $result_[$i] : $result_;
+                        }
+                    }
+                }
+                //Mage::Log('Error: '.print_r($result, true), null, 'tigobusiness-tigomoney.log');
+                //Mage::Log('decrypMessage data: '.$cleanr, null, 'tigobusiness-tigomoney.log');
+            } 
+        } catch (Exception $ex) {
+            Mage::Log('Error decrypMessage: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+        return $result;
+    }
+    /*
+     * Decrip Veriy Message
+     */
+    public function decrypMessageVerify($message){
+        $result = array();
+        try{
+            $prik = $this->priKey;
+            $response = '';
+            $cleanr = '';
+            if (isset($message)) {
+                $response = base64_decode(str_replace(' ','+',$message));
+                $cleanr = mcrypt_ecb( MCRYPT_3DES , $prik , $response, MCRYPT_DECRYPT);
+                if($cleanr){
+                    $result = explode(';', $cleanr);
+                }
+            } 
+        } catch (Exception $ex) {
+            Mage::Log('Error decrypMessageVerify: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+        return $result;
+    }
+    /*
+     * Verify transaction
+     */
+    public function verify($id){
+        $result = '';
+        try{
+            
+            $this->setParamKeyTigo();
+            
+            $pubk = $this->pubKey;// Identify key
+            $prik = $this->priKey;//Encrypt Key
+            Mage::Log('the status -- of Cronjob: '.$this->urlTransaction, null, 'tigobusiness-tigomoney.log');
+            $connect = array();
+            
+            $connect['proxyusername'] = $this->proxyusername;
+            $connect['proxypassword'] = $this->proxypassword;
+            $connect['proxyhost'] = $this->proxyhost;
+            $connect['proxyport'] = $this->proxyport;
+            $connect['urlTransaction'] = $this->urlTransaction;
+            
+            //Mage::Log('Error data Verify: '.$pubk.' ---- '.$prik, null, 'tigobusiness-tigomoney.log');
+            
+            $response = '';
+            $cleanr = '';
+            if (isset($id)) {
+                $cleanr = base64_encode(mcrypt_ecb( MCRYPT_3DES , $prik , $id, MCRYPT_ENCRYPT)); 
+            } else {
+                $response='';
+            }
+            $param = array(
+                'key' => trim($pubk),
+                'parametros' => trim($cleanr)
+            );
+            //Mage::Log('Error Param Verify: '.print_r($param, true), null, 'tigobusiness-tigomoney.log');
+            $result = $this->wsAction('consultarEstado', $param, $connect);
+            //Mage::Log('Error result Verify: '.print_r($result, true), null, 'tigobusiness-tigomoney.log');
+        } catch (Exception $ex){
+            Mage::Log('Error Verify: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+        return $result;
     }
     /*
      * Verify the transacction
@@ -264,5 +466,128 @@ class Tigo_Tmoney_Model_Paymethod extends Mage_Payment_Model_Method_Abstract{
             Mage::Log('Error to verify the status of Tigomoney Transaction: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
         }
         return $response_;
+    }
+    /*
+     * Get Verify Action in cronjob
+     */
+    public function verifyCron($id, $storeID){
+        $result = '';
+        try{
+            Mage::Log('the status of Cronjob: '.$id.'  -  '. $storeID, null, 'tigobusiness-tigomoney.log');
+            $this->setParamKeyTigoCron($storeID);
+            Mage::Log('the status -- of Cronjob: '.Mage::getStoreConfig('tigo_tmoney/tmoney/submit_url', $storeID), null, 'tigobusiness-tigomoney.log');
+            $pubk = $this->pubKey;// Identify key
+            $prik = $this->priKey;//Encrypt Key
+            
+            $connect = array();
+            
+            $connect['proxyusername'] = $this->proxyusername;
+            $connect['proxypassword'] = $this->proxypassword;
+            $connect['proxyhost'] = $this->proxyhost;
+            $connect['proxyport'] = $this->proxyport;
+            $connect['urlTransaction'] = $this->urlTransaction;
+            
+            //Mage::Log('Error data Verify: '.$pubk.' ---- '.$prik, null, 'tigobusiness-tigomoney.log');
+            
+            $response = '';
+            $cleanr = '';
+            if (isset($id)) {
+                $cleanr = base64_encode(mcrypt_ecb( MCRYPT_3DES , $prik , $id, MCRYPT_ENCRYPT)); 
+            } else {
+                $response='';
+            }
+            $param = array(
+                'key' => trim($pubk),
+                'parametros' => trim($cleanr)
+            );
+            //Mage::Log('Error Param Verify: '.print_r($param, true), null, 'tigobusiness-tigomoney.log');
+            $result = $this->wsAction('consultarEstado', $param, $connect);
+            //Mage::Log('Error result Verify: '.print_r($result, true), null, 'tigobusiness-tigomoney.log');
+        } catch (Exception $ex){
+            Mage::Log('Error Verify: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+        return $result;
+    }
+    /*
+     * Error Message
+     */
+    public function getError($error){
+        $result = array();
+        try{
+            switch ($error){
+                case '4': 
+                    $result['id'] = $error;
+                    $result['msg'] = 'AGENT_NOT_REGISTERED';
+                    $result['msg_show'] = 'Comercio no registrado.';
+                    break;
+                case '7':
+                    $result['id'] = $error;
+                    $result['msg'] = 'ACCESS_DENIED';
+                    $result['msg_show'] = 'Acceso Denegado. Por favor intente nuevamente y verifique los datos ingresados.';
+                    break;
+                case '8':
+                    $result['id'] = $error;
+                    $result['msg'] = 'BAD_PASSWORD';
+                    $result['msg_show'] = 'PIN no válido, intente nuevamente.';
+                    break;
+                case '11':
+                    $result['id'] = $error;
+                    $result['msg'] = 'PASSWORD_RETRY_EXCEED';
+                    $result['msg_show'] = 'Tiempo de respuesta excedido. Por favor inicie la transacción nuevamente.';
+                    break;
+                case '14':
+                    $result['id'] = $error;
+                    $result['msg'] = 'TARGET_NOT_REGISTERED';
+                    $result['msg_show'] = 'Billetera Móvil de destino no registrada. Por favor verifique sus datos.';
+                case '17':
+                    $result['id'] = $error;
+                    $result['msg'] = 'INVALID_AMOUNT';
+                    $result['msg_show'] = 'Monto no válido, verifique los datos proporcionados.';
+                    break;
+                case '19':
+                    $result['id'] = $error;
+                    $result['msg'] = 'AGENT_BLACKLISTED';
+                    $result['msg_show'] = 'Comercio no habilitado para el pago. Por favor comunicarse con el comercio.';
+                    break;
+                case '23':
+                    $result['id'] = $error;
+                    $result['msg'] = 'AMOUNT_TOO_SMALL';
+                    $result['msg_show'] = 'El monto introducido es menor al requerido, favor verifique los datos.';
+                    break;
+                case '24':
+                    $result['id'] = $error;
+                    $result['msg'] = 'AMOUNT_TOO_BIG';
+                    $result['msg_show'] = 'El monto introducido es mayor al requerido, favor verifique los datos.';
+                    break;
+                case '1001':
+                    $result['id'] = $error;
+                    $result['msg'] = 'INSUFFICIENTFUNDS';
+                    $result['msg_show'] = 'Los fondos en su Billetera Móvil son insuficientes, para realizar una carga diríjase al punto Tigo Money más cercano o marque *555#';
+                    break;
+                case '1002':
+                    $result['id'] = $error;
+                    $result['msg'] = 'TRANSACTIONRECOVERED';
+                    $result['msg_show'] = 'PIN incorrecto, su transacción no pudo ser completada. Inicie la transacción nuevamente y verifique en transacciones por completar.';
+                    break;
+                case '1004': 
+                    $result['id'] = $error;
+                    $result['msg'] = 'WALLETCAPEXCEEDED';
+                    $result['msg_show'] = 'Estimado cliente ha llegado al límite transacciones, si tiene alguna consulta comuníquese con el *555';
+                    break;
+                case '1012':
+                    $result['id'] = $error;
+                    $result['msg'] = 'PASSWORDERRORRETRYEXCEEDED';
+                    $result['msg_show'] = 'Estimado cliente ha excedido el límite de intentos de introducción de PIN. Por favor comuníquese con el *555 para solicitar su nuevo PIN.';
+                    break;
+                case '560':
+                    $result['id'] = $error;
+                    $result['msg'] = 'MISMO MONTO, ORIGEN Y DESTINO DENTRO DE 1 MIN';
+                    $result['msg_show'] = 'Estimado cliente su transacción no fue completada favor intentar nuevamente en 1 minuto.';
+                    break;
+            }
+        } catch (Exception $ex) {
+            Mage::Log('Error get ErrorMessage: '.$ex->getMessage(), null, 'tigobusiness-tigomoney.log');
+        }
+        return $result;
     }
 }

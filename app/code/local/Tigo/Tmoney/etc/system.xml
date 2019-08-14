@@ -22,7 +22,7 @@
                         <order_status translate="label">
                             <label>Order status</label>
                             <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_order_status_processing</source_model>
+                            <source_model>adminhtml/system_config_source_order_status</source_model>
                             <sort_order>2</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -60,14 +60,58 @@
                                 <show_in_website>1</show_in_website>
                                 <show_in_store>1</show_in_store>
                         </key_encrypt>
-                        <message translate="label">
-                                <label>Displayed Message</label>
-                                <frontend_type>textarea</frontend_type>
+                        
+                        <proxyhost>
+                                <label>Proxy Host</label>
+                                <frontend_type>text</frontend_type>
                                 <sort_order>7</sort_order>
                                 <show_in_default>1</show_in_default>
                                 <show_in_website>1</show_in_website>
                                 <show_in_store>1</show_in_store>
+                        </proxyhost>
+                        <proxyusername>
+                            <label>Proxy User</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </proxyusername>
+                        <proxypassword>
+                            <label>Proxy Password</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>9</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </proxypassword>
+                        <proxyport>
+                            <label>Proxy port</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </proxyport>
+                        
+                        <message translate="label">
+                            <label>Displayed Message</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
                         </message>
+                        
+                        <timeout translate="label">
+                            <label>Tiempo de vida (horas)</label>
+                            <frontend_type>text</frontend_type>
+                            <comment><![CDATA[Este tiempo de vida es para cancelar las ordenes que no se hallan completado despues del tiempo establecido.]]></comment>
+                            <sort_order>82</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </timeout>
                     </fields>
                 </tmoney>
             </groups>
