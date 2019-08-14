@@ -1,0 +1,18 @@
+<?php
+    $validate = $this->validate();
+    $message = (isset($validate['msg_public']))? $validate['msg_public'] : 'Lo sentimos ocurrio un error en la transaccion, porfavor intente de nuevo';
+    $image = $this->getSkinUrl('tmoney/img/error.png');
+    $url = Mage::getUrl('/');
+?>
+<div class="error-page-tigomoney">
+    <div class="image"><img src="<?php echo $image ?>" alt="Error" /></div>
+    <div class="page-title category-title">
+	<h2><?php echo $this->__('Lo sentimos ocurrio un error') ?></h2>
+    </div>
+    <section class="message">
+        <p><?php echo $this->__($message) ?></p>
+        <div class="content-buttons">
+            <a class="button" href="<?php echo $url ?>">Continuar comprando</a>
+        </div>
+    </section>
+</div>

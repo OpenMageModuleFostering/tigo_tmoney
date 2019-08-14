@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <default>
+        <reference name="head">		
+            <action method="addCss">
+                <stylesheet>tmoney/css/tigomoney.css</stylesheet>
+            </action>
+        </reference>
+    </default>
+    <tmoney_index_index>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block name="tmoney.index" type="tigo_tmoney/index" template="tigo/tmoney/paymod.phtml" />
+        </reference>
+    </tmoney_index_index>
+    <tmoney_index_success>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+       </reference>
+        <reference name="content">
+            <block name="tmoney_success" type="tigo_tmoney/success" template="tigo/tmoney/success.phtml" />
+        </reference>
+    </tmoney_index_success>
+    <tmoney_index_error>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block name="tmoney_error" type="tigo_tmoney/error" template="tigo/tmoney/error.phtml" />
+        </reference>
+    </tmoney_index_error>
+    <tmoney_index_back>
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+        <reference name="content">
+            <block name="tmoney.back" type="tigo_tmoney/back" template="tigo/tmoney/back.phtml" />
+        </reference>
+    </tmoney_index_back>
+</layout>

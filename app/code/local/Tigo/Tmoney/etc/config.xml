@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <modules>
+       <Tigo_Tmoney>
+          <version>0.1.0</version>
+       </Tigo_Tmoney>
+    </modules>
+ 	
+    <frontend>
+        <routers>
+            <tmoney>
+                <use>standard</use>
+                <args>
+                    <module>Tigo_Tmoney</module>
+                    <frontName>tigomoney</frontName>
+                </args>
+            </tmoney>
+        </routers>
+        <layout>
+            <updates>
+                <Tigo_Tmoney>
+                    <file>tigo_tmoney.xml</file>
+                </Tigo_Tmoney>
+            </updates>
+        </layout>
+    </frontend>
+	
+    <global>
+        <blocks>
+            <tmoney>
+                <class>Tigo_Tmoney_Block</class>
+            </tmoney>
+        </blocks>
+ 	<fieldsets>
+            <sales_convert_quote_payment>
+            </sales_convert_quote_payment>
+    	</fieldsets>
+	<payment>
+            <cc>
+                <types>
+                        
+                </types>
+            </cc>
+        </payment>
+        <models>
+            <tmoney>
+                <class>Tigo_Tmoney_Model</class>
+            </tmoney>
+        </models>
+ 
+        <resources>
+            <tmoney_setup>
+                <setup>
+                    <module>Tigo_Tmoney</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </tmoney_setup>
+            <tmoney_write>
+                <connection>
+                  <use>core_write</use>
+                </connection>
+            </tmoney_write>
+            <tmoney_read>
+               <connection>
+                <use>core_read</use>
+              </connection>
+            </tmoney_read>
+        </resources>
+    </global>
+ 
+    <default>
+        <payment>
+            <tmoney>
+                <active>1</active>
+                <model>tmoney/paymethod</model>
+                <order_status>pending</order_status>
+                <title>Tigo Business - Tigo Money</title>
+                <payment_action>authorize</payment_action>
+                <submit_url>http://190.129.208.178:96/vipagos/faces/payment.xhtml</submit_url>
+                <key_id>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</key_id>
+                <key_encrypt>xxxxxxxxxxxx</key_encrypt>
+                <message>Para realizar las transacciones a traves de TIGO Money se enviara un mensaje a su celular pidiendo que coloque su PIN para realizar la transaccion.</message>
+                <allowspecific>0</allowspecific>
+            </tmoney>
+         </payment>
+    </default>
+</config>

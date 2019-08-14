@@ -1,0 +1,40 @@
+<?php $_code=$this->getMethodCode(); 
+ 
+
+?>
+<ul id="payment_form_<?php echo $_code ?>" style="display:none">
+    
+    <li>
+        <div class="msessage">
+            <div class="msg"><?php echo $this->getMessage() ?></div>
+        </div>
+        <div class="input-box">
+            <label for="<?php echo $_code ?>_tigo_money_id"><?php echo __('Introduce tu numero de billetera') ?> 
+                <span class="required"></span>
+            </label>
+            <input type="text" name="<?php echo $_code ?>_tigo_money_id" class="input-text required-entry" id="<?php echo $_code ?>_tigo_money_id" />
+        </div>
+    </li>
+</ul>
+<script>
+    /*var $j = jQuery.noConflict();
+    $j(document).ready(function(){*/
+       /* $j("#paymod_payments_id").on("change", function() {
+            var pay_id = $j('#paymod_payments_id').val();
+            $j('#payment_form_paymod li.fields').hide('slow');
+            if($j('#payment_form_paymod li.fields_'+pay_id).is(':hidden')){
+                $j('#payment_form_paymod li.fields_'+pay_id).show('slow');
+            }
+            console.log(pay_id);
+        });*/
+        /*$j('#paymod_payments_id').change(function(){
+            console.log('holssss');
+            var pay_id = $j('#paymod_payments_id').val();
+            $j('#payment_form_paymod li.fields').hide('slow');
+            if($j('#payment_form_paymod li.fields_'+pay_id).is(':hidden')){
+                $j('#payment_form_paymod li.fields_'+pay_id).show('slow');
+            }
+            console.log(pay_id);
+        });*/
+    //});
+</script>

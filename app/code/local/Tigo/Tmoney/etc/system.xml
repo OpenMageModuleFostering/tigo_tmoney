@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+   <sections>
+        <payment>
+            <groups>
+                <tmoney translate="label" module="paygate">
+                    <label>Tigo - TigoMoney</label>
+                    <sort_order>570</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </active>
+                        <order_status translate="label">
+                            <label>Order status</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_order_status_processing</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </order_status>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>
+                        <submit_url>
+                                <label>URL Transaction</label>
+                                <frontend_type>text</frontend_type>
+                                <sort_order>4</sort_order>
+                                <show_in_default>1</show_in_default>
+                                <show_in_website>1</show_in_website>
+                                <show_in_store>1</show_in_store>
+                        </submit_url>
+                        <key_id>
+                                <label>Llave de identifiación</label>
+                                <frontend_type>text</frontend_type>
+                                <sort_order>5</sort_order>
+                                <show_in_default>1</show_in_default>
+                                <show_in_website>1</show_in_website>
+                                <show_in_store>1</show_in_store>
+                        </key_id>
+                        <key_encrypt>
+                                <label>Llave de encriptación</label>
+                                <frontend_type>text</frontend_type>
+                                <sort_order>6</sort_order>
+                                <show_in_default>1</show_in_default>
+                                <show_in_website>1</show_in_website>
+                                <show_in_store>1</show_in_store>
+                        </key_encrypt>
+                        <message translate="label">
+                                <label>Displayed Message</label>
+                                <frontend_type>textarea</frontend_type>
+                                <sort_order>7</sort_order>
+                                <show_in_default>1</show_in_default>
+                                <show_in_website>1</show_in_website>
+                                <show_in_store>1</show_in_store>
+                        </message>
+                    </fields>
+                </tmoney>
+            </groups>
+        </payment>
+    </sections>
+</config>

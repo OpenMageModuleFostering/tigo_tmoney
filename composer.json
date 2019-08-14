@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Tigo_Tmoney",
+    "type": "magento-module",
+    "license": "GPL",
+    "homepage": "",
+    "description": "test",
+    "authors": [
+    {
+        "name": "Marcelo Guevara",
+        "email": "guechamagu@yahoo.es"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

@@ -1,0 +1,18 @@
+<?php
+    $validate = $this->validate();
+    $message = (isset($validate['msg_public']))? $validate['msg_public'] : 'Felicidades la transaccion se ha realizado';
+    $image = $this->getSkinUrl('tmoney/img/success.png');
+    $url = Mage::getUrl('/');
+?>
+<div class="success-page-tigomoney">
+    <div class="image"><img src="<?php echo $image ?>" alt="Exito" /></div>
+    <div class="page-title category-title">
+	<h2><?php echo $this->__('Felicidades') ?></h2>
+    </div>
+    <section class="message">
+        <p><?php echo $this->__($message) ?></p>
+        <div class="content-buttons">
+            <a class="button" href="<?php echo $url ?>">Continuar comprando</a>
+        </div>
+    </section>
+</div>
